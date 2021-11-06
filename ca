@@ -7,6 +7,7 @@ month=int(d[1])
 day=int(d[2])
 from subprocess import check_output
 from shlex import split
-cmd='cat 'env['HOME']'/PIM/diary/'+year+'/'+str(month)+'/'+str(day)+'.md'
+cmd = ['cat' , env['HOME']+'/PIM/diary/'+year+'/'+str(month)+'/'+str(day)+'.md']
+cmd = ' '.join(cmd)
 print(year+'/'+str(month)+'/'+str(day))
 print(check_output(split(cmd)).decode()) 
