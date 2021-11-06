@@ -1,13 +1,58 @@
 #!/usr/bin/python3
 import datetime
 from os import environ as env
-d=str(datetime.datetime.fromordinal(datetime.date.today().toordinal()+1).date()).split('-')
-year=d[0]
-month=int(d[1])
-day=int(d[2])
+from os.path import sep as psep
 from subprocess import check_output
-from shlex import split
-cmd = ['cat' , env['HOME']+'/PIM/diary/'+year+'/'+str(month)+'/'+str(day)+'.md']
-cmd = ' '.join(cmd)
-print(year+'/'+str(month)+'/'+str(day))
-print(check_output(split(cmd)).decode()) 
+from os.path import exists
+from os import listdir
+from os.path import dirname
+from os.path import basename
+from re import match
+from argparse import ArgumentParser
+
+DIARY_PATH = env['HOME']+'/PIM/diary'
+
+def parse_args():
+    ap=ArgumentParser("prints count days of the diary starting at today")
+    ap.add_argument("days",nargs='?',type=int,default=2)
+    args=ap.parse_args()
+    return args
+
+
+def main():
+    for i in range(args.days):
+        d=str(datetime.datetime.fromordinal(datetime.date.today().toordinal() + i ).date()).split('-')
+        year=d[0]
+        month=int(d[1])
+        day=int(d[2])
+        date = [ year , month , day]
+        date = [ str(d) for d in date]
+        datepath = psep.join(date)
+        filepath = DIARY_PATH + psep + datepath + '.md'
+        if exists(filepath):
+            with open(filepath) as f:
+                ldp=len(datepath)
+                print(f"{datepath} [")
+                print("="*ldp)
+                lines=f.read().split(psep)
+                for line in lines:
+                    print(" "*(ldp+2)+line)
+        dn=dirname(filepath)
+        bn=basename(filepath)
+        dirlist=listdir(dn)
+        ldn=len(dn)
+        for thing in dirlist:
+            if match(bn[:-3]+'.+[.]md',thing):
+                header = f"warning: extra file: {thing} ["
+                lh=len(header)
+                print(header)
+                with open(dn+psep+thing) as f:
+                    lines=f.read().split(psep)
+                    for line in lines:
+                        print(" "*lh+line)
+                print((lh-1)*" "+"]")
+        print(ldp*" "+" ]")
+
+if __name__=="__main__":
+    args=parse_args()
+    main()
